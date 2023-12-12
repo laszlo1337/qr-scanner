@@ -8,6 +8,7 @@ declare class QrScanner {
     private static _barcodeDetectorFormats;
     /** @deprecated */
     static set WORKER_PATH(workerPath: string);
+    static setBarcodeDetectorFormats(formats: string[]): void;
     static hasCamera(): Promise<boolean>;
     static listCameras(requestLabels?: boolean): Promise<Array<QrScanner.Camera>>;
     readonly $video: HTMLVideoElement;

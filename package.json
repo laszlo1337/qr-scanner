@@ -38,9 +38,9 @@
   "author": "Nimiq (https://nimiq.com)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nimiq/qr-scanner/issues"
+    "url": "git+https://github.com/laszlo1337/qr-scanner.git"
   },
-  "homepage": "https://github.com/nimiq/qr-scanner#readme",
+  "homepage": "https://github.com/laszlo1337/qr-scanner#readme",
   "dependencies": {
     "@types/offscreencanvas": "^2019.6.4"
   },

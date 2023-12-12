@@ -12,6 +12,10 @@ class QrScanner {
             + 'Have a look at the README for new setup instructions.');
     }
 
+    static setBarcodeDetectorFormats(formats: string[]) {
+        QrScanner._barcodeDetectorFormats = formats;
+    }
+
     static async hasCamera(): Promise<boolean> {
         try {
             return !!(await QrScanner.listCameras(false)).length;
@@ -193,7 +197,7 @@ class QrScanner {
         const videoContainer = video.parentElement!;
 
         if (options.barcodeDetectorFormats?.length) {
-            QrScanner._barcodeDetectorFormats = options.barcodeDetectorFormats;
+            QrScanner.setBarcodeDetectorFormats(options.barcodeDetectorFormats);
         }
 
         if (options.highlightScanRegion || options.highlightCodeOutline) {
