@@ -1,3 +1,10 @@
+This fork just fixes flashlight and adds possibility of scanning more formats if browser supports BarcodeDetector API
+
+use `barcodeDetectorFormats` in Options object to supply custom formats. (https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API#supported_barcode_formats)
+
+
+Original readme:
+
 # QR Scanner
 
 Javascript QR Code Scanner based on [Cosmo Wolfe's javascript port](https://github.com/cozmo/jsqr) of [Google's ZXing library](https://github.com/zxing/zxing).
