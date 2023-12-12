@@ -1,8 +1,10 @@
 class QrScanner {
     static readonly DEFAULT_CANVAS_SIZE = 400;
+    static readonly DEFAULT_FORMAT = 'qr_code';
     static readonly NO_QR_CODE_FOUND = 'No QR code found';
     private static _disableBarcodeDetector = false;
     private static _workerMessageId = 0;
+    private static _barcodeDetectorFormats: string[] = [QrScanner.DEFAULT_FORMAT];
 
     /** @deprecated */
     static set WORKER_PATH(workerPath: string) {
@@ -82,6 +84,7 @@ class QrScanner {
             highlightScanRegion?: boolean,
             highlightCodeOutline?: boolean,
             overlay?: HTMLDivElement,
+            barcodeDetectorFormats: string[];
             /** just a temporary flag until we switch entirely to the new api */
             returnDetailedScanResult?: true,
         },
@@ -114,6 +117,7 @@ class QrScanner {
             maxScansPerSecond?: number;
             highlightScanRegion?: boolean,
             highlightCodeOutline?: boolean,
+            barcodeDetectorFormats?: string[],
             overlay?: HTMLDivElement,
             /** just a temporary flag until we switch entirely to the new api */
             returnDetailedScanResult?: true,
@@ -187,6 +191,10 @@ class QrScanner {
             shouldHideVideo = true;
         }
         const videoContainer = video.parentElement!;
+
+        if (options.barcodeDetectorFormats?.length) {
+            QrScanner._barcodeDetectorFormats = options.barcodeDetectorFormats;
+        }
 
         if (options.highlightScanRegion || options.highlightCodeOutline) {
             const gotExternalOverlay = !!options.overlay;
@@ -627,7 +635,7 @@ class QrScanner {
         const useBarcodeDetector = !QrScanner._disableBarcodeDetector
             && 'BarcodeDetector' in window
             && BarcodeDetector.getSupportedFormats
-            && (await BarcodeDetector.getSupportedFormats()).includes('qr_code');
+            && (await BarcodeDetector.getSupportedFormats()).includes(this.DEFAULT_FORMAT);
 
         if (!useBarcodeDetector) return createWorker();
 
@@ -635,21 +643,21 @@ class QrScanner {
         // Chromium based browsers, regardless of the version. For that constellation, the BarcodeDetector does not
         // error but does not detect QR codes. Macs without an M1/M2 or before Ventura are fine.
         // See issue #209 and https://bugs.chromium.org/p/chromium/issues/detail?id=1382442
-        // TODO update this once the issue in macOS is fixed
+        // Issue in macOS is Verified in Chrome 113.0.5620.0.
         const userAgentData = navigator.userAgentData;
         const isChromiumOnMacWithArmVentura = userAgentData // all Chromium browsers support userAgentData
-            && userAgentData.brands.some(({ brand }) => /Chromium/i.test(brand))
-            && /mac ?OS/i.test(userAgentData.platform)
-            // Does it have an ARM chip (e.g. M1/M2) and Ventura? Check this last as getHighEntropyValues can
-            // theoretically trigger a browser prompt, although no browser currently does seem to show one.
-            // If browser or user refused to return the requested values, assume broken ARM Ventura, to be safe.
-            && await userAgentData.getHighEntropyValues(['architecture', 'platformVersion'])
-                .then(({ architecture, platformVersion }) =>
-                    /arm/i.test(architecture || 'arm') && parseInt(platformVersion || '13') >= /* Ventura */ 13)
-                .catch(() => true);
+          && userAgentData.brands.some(({ brand, version }) => /Chromium/i.test(brand) && parseInt(version) < 113)
+          && /mac ?OS/i.test(userAgentData.platform)
+          // Does it have an ARM chip (e.g. M1/M2) and Ventura? Check this last as getHighEntropyValues can
+          // theoretically trigger a browser prompt, although no browser currently does seem to show one.
+          // If browser or user refused to return the requested values, assume broken ARM Ventura, to be safe.
+          && await userAgentData.getHighEntropyValues(['architecture', 'platformVersion'])
+            .then(({ architecture, platformVersion }) =>
+              /arm/i.test(architecture || 'arm') && parseInt(platformVersion || '13') >= /* Ventura */ 13)
+            .catch(() => true);
         if (isChromiumOnMacWithArmVentura) return createWorker();
 
-        return new BarcodeDetector({ formats: ['qr_code'] });
+        return new BarcodeDetector({ formats:  this._barcodeDetectorFormats });
     }
 
     private _onPlay(): void {

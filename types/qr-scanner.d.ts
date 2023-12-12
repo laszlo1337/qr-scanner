@@ -1,9 +1,11 @@
 /// <reference types="offscreencanvas" />
 declare class QrScanner {
     static readonly DEFAULT_CANVAS_SIZE = 400;
+    static readonly DEFAULT_FORMAT = "qr_code";
     static readonly NO_QR_CODE_FOUND = "No QR code found";
     private static _disableBarcodeDetector;
     private static _workerMessageId;
+    private static _barcodeDetectorFormats;
     /** @deprecated */
     static set WORKER_PATH(workerPath: string);
     static hasCamera(): Promise<boolean>;
@@ -33,6 +35,7 @@ declare class QrScanner {
         highlightScanRegion?: boolean;
         highlightCodeOutline?: boolean;
         overlay?: HTMLDivElement;
+        barcodeDetectorFormats: string[];
         /** just a temporary flag until we switch entirely to the new api */
         returnDetailedScanResult?: true;
     });
